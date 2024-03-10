@@ -12,8 +12,9 @@ class SingleMonthAnalyzer:
         
         query: str, optional
         """
+        df = df.copy()
         if query is not None:
-            df = df.query(query)
+            df.query(query, inplace=True)
         def count_(mode):
             df_sub = df.query(f"`{COL_MODE}` == @mode")
             count = df_sub.groupby(COL_LEVEL)[COL_COUNT].sum()
@@ -29,7 +30,7 @@ class SingleMonthAnalyzer:
     def song_preference(self, df, query=None):
         df = df.copy()
         if query is not None:
-            df = df.query(query)
+            df.query(query, inplace=True)
         df["Pref_Chart"] = 1 - df.groupby([COL_LEVEL, COL_MODE])[COL_COUNT].rank(ascending=False, pct=True)
         df["Pref_Song"] = df.groupby(COL_TITLE)["Pref_Chart"].transform("mean")
         pref_song = df.groupby(COL_TITLE)["Pref_Chart"].mean().sort_values(ascending=False)
