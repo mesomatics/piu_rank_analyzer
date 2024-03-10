@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ..config import *
+from ..cols import *
 
 
 class SingleMonthAnalyzer:
@@ -30,7 +30,9 @@ class SingleMonthAnalyzer:
         df = df.copy()
         if query is not None:
             df = df.query(query)
-        df["Pref_Chart"] = df.groupby([COL_LEVEL, COL_MODE])[COL_COUNT].rank(ascending=False, pct=True)
+        df["Pref_Chart"] = 1 - df.groupby([COL_LEVEL, COL_MODE])[COL_COUNT].rank(ascending=False, pct=True)
         df["Pref_Song"] = df.groupby(COL_TITLE)["Pref_Chart"].transform("mean")
-        pref_song = df.groupby(COL_TITLE)["Pref_Chart"].mean()
+        pref_song = df.groupby(COL_TITLE)["Pref_Chart"].mean().sort_values(ascending=False)
+        df["Pref_Diff"] = df["Pref_Chart"] - df["Pref_Song"]
+        df.sort_values("Pref_Diff", inplace=True)
         return pref_song, df
