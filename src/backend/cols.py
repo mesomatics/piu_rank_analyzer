@@ -1,0 +1,5 @@
+COL_TITLE = "title"
+COL_LEVEL = "level"
+COL_MODE = "mode"
+COL_RANK = "rank"
+COL_COUNT = "count"
