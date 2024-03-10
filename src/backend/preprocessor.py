@@ -1,3 +1,5 @@
+from .cols import *
+
 class PiuRankPreprocessor:
     def _preprocess(self, df):
         df.query("pattern != 'C'", inplace=True)
