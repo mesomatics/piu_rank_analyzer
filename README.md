@@ -10,15 +10,15 @@ from src.backend.analyzer.single_month import SingleMonthAnalyzer
 data = PiuRankPreprocessor().run()
 sma = SingleMonthAnalyzer()
 ```
-
-#### 레벨 선호도
+---
+#### Level Preference
 ```python
 result = sma.level_preference(data[202403])
 result.plot()
 ```
 ![download](https://github.com/mesomatics/piu_stepchart_rank_analyzer/assets/68718172/3fc90cba-1895-4577-9894-7dd8536e550d)
-
-#### 노래 선호도
+---
+#### Song Preference
 ```python
 song_pref, chart_pref = sma.song_preference(data[202403])
 print(song_pref.head().to_markdown())
@@ -32,8 +32,22 @@ print(song_pref.head().to_markdown())
 | 시             |     0.968691 |
 | 애프터 라이크  |     0.965806 |
 ```
-
-#### 채보 선호도 (노래 선호도 adjusted)
+```python
+## 더블 18렙 이상만 분석
+song_pref, _ = sma.song_preference(data[202403], query="mode == 'D' and level >= 18")
+print(song_pref.head().to_markdown())
+```
+```python
+| title                                    |   Pref_Chart |
+|:-----------------------------------------|-------------:|
+| 스테이저                                 |     0.993243 |
+| 사이먼 세이즈, 유로댄스!! (feat. Sara☆M) |     0.990564 |
+| 리틀 먼치킨                              |     0.989702 |
+| 서든 어페어런스 이미지                   |     0.983097 |
+| 톰보이                                   |     0.980214 |
+```
+---
+#### Chart Preference (Song preference adjusted)
 ```python
 print(chart_pref.head().to_markdown()) ## 갓채보
 ```
