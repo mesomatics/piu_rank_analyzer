@@ -78,7 +78,12 @@ class PreferenceModel(Model):
         return result
 
     def get_preference(self):
-        preference = pd.Series(self.get_weights()[0].flatten(), index=self.title_map.values)
+        preference = pd.Series(
+            self.get_weights()[0].flatten(),
+            index=self.title_map.values,
+            name="Preference"
+        )
+        preference.index.name="Title"
         return preference.sort_values(ascending=False)
 
     def run(self):
