@@ -22,6 +22,7 @@ result.plot()
 ![download](https://github.com/mesomatics/piu_stepchart_rank_analyzer/assets/68718172/3fc90cba-1895-4577-9894-7dd8536e550d)
 ---
 #### Song Preference (Revised : 24/03/13)
+[REF](https://github.com/mesomatics/piu_stepchart_rank_analyzer/wiki/Song-Preference)
 ```python
 from src.backend.analyzer.preference import PreferenceModel
 model = PreferenceModel(df_full)
