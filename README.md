@@ -13,12 +13,38 @@ sma = SingleMonthAnalyzer()
 ---
 #### Level Preference
 ```python
-result = sma.level_preference(data[202403])
+df = data[202402]
+df_full = df.query("mode in ['S', 'D']").copy()
+
+result = sma.level_preference(data[202402])
 result.plot()
 ```
 ![download](https://github.com/mesomatics/piu_stepchart_rank_analyzer/assets/68718172/3fc90cba-1895-4577-9894-7dd8536e550d)
 ---
-#### Song Preference
+#### Song Preference (Revised : 24/03/13)
+[REF](https://github.com/mesomatics/piu_stepchart_rank_analyzer/wiki/Song-Preference)
+```python
+from src.backend.analyzer.preference import PreferenceModel
+model = PreferenceModel(df_full)
+result = model.run()
+print(result.head(10).to_markdown())
+```
+```
+|                      |       0 |
+|:---------------------|--------:|
+| 판도라               | 2.71543 |
+| 일레븐               | 2.5596  |
+| 톰보이               | 2.51905 |
+| 애프터 라이크        | 2.46134 |
+| 유포리아닉           | 2.44486 |
+| 테디베어             | 2.42948 |
+| 블루이쉬 로즈        | 2.3999  |
+| 얼론                 | 2.37869 |
+| 누드                 | 2.30005 |
+| 요! 세이!! 페어리!!! | 2.23893 |
+```
+
+##### Deprecated. will be removed soon
 ```python
 song_pref, chart_pref = sma.song_preference(data[202403])
 print(song_pref.head().to_markdown())
