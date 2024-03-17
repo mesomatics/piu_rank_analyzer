@@ -1,39 +1,52 @@
 import pandas as pd
 
 from ..cols import *
+from .preference import PreferenceModel
 
 
 class SingleMonthAnalyzer:
-    def level_preference(self, df, query=None):
-        """
-        Parameters
-        ----------
-        df: DataFrame
-        
-        query: str, optional
-        """
-        df = df.copy()
-        if query is not None:
-            df.query(query, inplace=True)
-        def count_(mode):
-            df_sub = df.query(f"`{COL_MODE}` == @mode")
-            count = df_sub.groupby(COL_LEVEL)[COL_COUNT].sum()
-            count.name = mode
-            return count
-        count_s = count_("S")
-        count_d = count_("D")
-        count_all = pd.concat([count_s, count_d], axis=1)
-        count_all = count_all.fillna(0).astype(int)
-        count_all["ALL"] = count_all.sum(axis=1)
-        return count_all / count_all.sum()
+    def __init__(self):
+        self.full = ["S", "D"]
+        self.basic = ["E", "N", "H", "V"]
 
-    def song_preference(self, df, query=None):
-        df = df.copy()
-        if query is not None:
-            df.query(query, inplace=True)
-        df["Pref_Chart"] = 1 - df.groupby([COL_LEVEL, COL_MODE])[COL_COUNT].rank(ascending=False, pct=True)
-        df["Pref_Song"] = df.groupby(COL_TITLE)["Pref_Chart"].transform("mean")
-        pref_song = df.groupby(COL_TITLE)["Pref_Chart"].mean().sort_values(ascending=False)
-        df["Pref_Diff"] = df["Pref_Chart"] - df["Pref_Song"]
-        df.sort_values("Pref_Diff", ascending=False, inplace=True)
-        return pref_song, df[[COL_TITLE, COL_LEVEL, COL_MODE]]
+    def set_df(self, df):
+        self.df = df.query("mode in @self.full").copy()
+
+    def _calc_mode_preference(self):
+        count = self.df.groupby(COL_MODE)[COL_COUNT].sum()
+        count = count / count.sum()
+        count.name = "Mode_Preference"
+        self._mode_preference = count.reset_index()
+
+    def _calc_level_preference(self):
+        count = self.df.groupby([COL_MODE, COL_LEVEL])[COL_COUNT].sum() / \
+                self.df.groupby(COL_MODE)[COL_COUNT].sum()
+        count.name = "Level_Preference"
+        self._level_preference = count.reset_index()
+
+    def _calc_song_preference(self):
+        model = PreferenceModel(self.df)
+        result = model.run()
+        result = result.reset_index()
+        self._song_preference = result
+
+    def preference_getter(func):
+        func_name = func.__name__
+        @property
+        def getter(self):
+            if not hasattr(self, f"_{func.__name__}"):
+                getattr(self, f"_calc_{func.__name__}")()
+            return getattr(self, f"_{func.__name__}")
+        return getter
+
+    @preference_getter
+    def mode_preference(self):
+        pass
+
+    @preference_getter
+    def level_preference(self):
+        pass
+
+    @preference_getter
+    def song_preference(self):
+        pass
