@@ -3,10 +3,13 @@ import os
 import pandas as pd
 
 from .cols import *
-from .estimator import CountEstimator
+from .estimator import LinearEstimator, NormalEstimator
 
 
 class PiuRankPreprocessor:
+    def __init__(self, estimator=NormalEstimator):
+        self.count_estimator = estimator()
+
     def _read_files(self, path):
         files = sorted(os.listdir(path))
         data = {}
@@ -17,7 +20,7 @@ class PiuRankPreprocessor:
         return data
 
     def _preprocess(self, df):
-        df.query("pattern != 'C'", inplace=True)
+        df.query("pattern.str[0] in ['S', 'D']", inplace=True)
         df[COL_MODE] = df["pattern"].str[:1]
         df[COL_LEVEL] = df["pattern"].str[1:].astype(int)
         df.rename(columns={"song": COL_TITLE}, inplace=True)
@@ -31,8 +34,7 @@ class PiuRankPreprocessor:
             key: yearmonth(int), value: DataFrame
         """
         data = self._read_files(path)
-        ce = CountEstimator()
         for month, df in data.items():
             df = self._preprocess(df)
-            data[month] = ce(df)
+            data[month] = self.count_estimator(df)
         return data
