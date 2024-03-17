@@ -4,7 +4,7 @@ import numpy as np
 from .cols import *
 
 
-class CountEstimator:
+class LinearEstimator:
     """
     Rank to Count
     """
@@ -15,7 +15,7 @@ class CountEstimator:
         df[COL_COUNT] = len(df) - df[COL_RANK].rank() + 1
         return df
 
-class NormalEstimator(CountEstimator):
+class NormalEstimator:
     """
     Rank to Count
     """
