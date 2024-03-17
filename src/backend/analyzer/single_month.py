@@ -6,11 +6,13 @@ from .preference import PreferenceModel
 
 class SingleMonthAnalyzer:
     def __init__(self):
-        self.full = ["S", "D"]
-        self.basic = ["E", "N", "H", "V"]
+        self._mode_preference = None
+        self._level_preference = None
+        self._song_preference = None
 
     def set_df(self, df):
-        self.df = df.query("mode in @self.full").copy()
+        self.__init__()
+        self.df = df.copy()
 
     def _calc_mode_preference(self):
         count = self.df.groupby(COL_MODE)[COL_COUNT].sum()
@@ -34,7 +36,7 @@ class SingleMonthAnalyzer:
         func_name = func.__name__
         @property
         def getter(self):
-            if not hasattr(self, f"_{func.__name__}"):
+            if getattr(self, f"_{func.__name__}") is None:
                 getattr(self, f"_calc_{func.__name__}")()
             return getattr(self, f"_{func.__name__}")
         return getter
@@ -50,3 +52,21 @@ class SingleMonthAnalyzer:
     @preference_getter
     def song_preference(self):
         pass
+
+    def decompose(self):
+        result = self.df.merge(self.mode_preference)  \
+                        .merge(self.level_preference) \
+                        .merge(self.song_preference)
+
+        result["Pick_Ratio"] = result["count"] / result["count"].sum()
+
+        level_total_pref = result.groupby("pattern")["Song_Preference"].sum()
+        level_total_pref.name = "Level_total_pref"
+        level_total_pref = level_total_pref.reset_index()
+        result = result.merge(level_total_pref)
+        result["Song_Preference_in_Level"] = result["Song_Preference"] / result["Level_total_pref"]
+        result["Chart_Preference"] = result.eval(
+            "Pick_Ratio / (Mode_Preference * Level_Preference * Song_Preference_in_Level)"
+        )
+        result.drop(columns="Level_total_pref", inplace=True)
+        return result
